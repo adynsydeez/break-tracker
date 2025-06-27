@@ -8,12 +8,12 @@ interface SectionProps {
 
 const Section = ({ title, size, children }: SectionProps) => {
     let height;
-    if (size === "half") height = "h-[47.2vh]";
-    else if (size === "full") height = "h-[96vh]";
+    if (size === "half") height = "full";
+    else if (size === "full") height = "[96vh]";
 
     return (
         <fieldset
-            className={`min-w-[100%] fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 ${height} max-${height}`}
+            className={`overflow-y-auto overflow-hidden min-w-[100%] fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 h-${height}`}
         >
             <legend className="fieldset-legend">{title}</legend>
             {children}

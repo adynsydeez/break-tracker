@@ -1,16 +1,64 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EditBreakButton from "./EditBreakButton";
 import { init } from "next/dist/compiled/webpack/webpack";
+import { Interface } from "readline";
 
-interface BreakRowProps {
+interface Break {
+    id: number;
     initial: string;
     firstTen: string;
     thirty: string;
     secondTen: string;
+    refreshBreaks: () => void;
 }
 
-const BreakRow = ({ initial, firstTen, thirty, secondTen }: BreakRowProps) => {
+const BreakRow = ({
+    id,
+    initial,
+    firstTen,
+    thirty,
+    secondTen,
+    refreshBreaks,
+}: Break) => {
+    const editBreak = async () => {
+        if (
+            editInitial == initial &&
+            editFirstTen == firstTen &&
+            editThirty == thirty &&
+            editSecondTen == secondTen
+        ) {
+            setMode("read");
+        } else {
+            try {
+                const response = await fetch(
+                    `http://localhost:5000/api/breaks/${id}`,
+                    {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            initial: editInitial,
+                            firstTen: editFirstTen,
+                            thirty: editThirty,
+                            secondTen: editSecondTen,
+                        }),
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to update break");
+                }
+
+                setMode("read");
+                refreshBreaks();
+            } catch (error) {
+                console.error("Update error:", error);
+            }
+        }
+    };
+
     const [mode, setMode] = useState("read");
 
     const [editInitial, setEditInitial] = useState(initial);
@@ -66,7 +114,7 @@ const BreakRow = ({ initial, firstTen, thirty, secondTen }: BreakRowProps) => {
                     />
                 </td>
                 <td>
-                    <EditBreakButton onClick={() => setMode("read")} />
+                    <EditBreakButton onClick={editBreak} />
                 </td>
             </tr>
         );

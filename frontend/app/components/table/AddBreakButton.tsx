@@ -1,6 +1,10 @@
 import React from "react";
 
-const AddBreakButton = () => {
+interface AddBreakButtonProps {
+    onClick: () => void;
+}
+
+const AddBreakButton = ({ onClick }: AddBreakButtonProps) => {
     const tickSvg = (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +22,11 @@ const AddBreakButton = () => {
         </svg>
     );
 
-    return <button className="btn btn-soft btn-success">{tickSvg}</button>;
+    return (
+        <button className="btn btn-soft btn-success" onClick={onClick}>
+            {tickSvg}
+        </button>
+    );
 };
 
 export default AddBreakButton;

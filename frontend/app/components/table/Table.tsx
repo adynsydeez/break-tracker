@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
-import AddBreakTr from "./AddBreakTr";
+import AddBreakTr from "./AddBreakRow";
 
 interface TableProps {
     children: React.ReactNode;
@@ -25,7 +25,6 @@ const Table = ({ children }: TableProps) => {
                 </thead>
                 <tbody>
                     {children}
-                    <AddBreakTr/>
                 </tbody>
             </table>
         </div>

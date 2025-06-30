@@ -4,11 +4,12 @@ import Table from "./components/table/Table";
 import Section from "./components/Section";
 import Timeline from "./components/timeline/Timeline";
 import BreakRow from "./components/table/BreakRow";
+import AddBreakRow from "./components/table/AddBreakRow";
 
 import { useState, useEffect } from "react";
 
 type Break = {
-    id: string | number;
+    id: number;
     initial: any;
     firstTen: any;
     thirty: any;
@@ -18,10 +19,14 @@ type Break = {
 export default function Home() {
     const [breaks, setBreaks] = useState<Break[]>([]);
 
-    useEffect(() => {
+    const refreshBreaks = () => {
         fetch("http://localhost:5000/api/breaks")
             .then((res) => res.json())
             .then((data) => setBreaks(data));
+    };
+
+    useEffect(() => {
+        refreshBreaks();
     }, []);
 
     return (
@@ -31,8 +36,17 @@ export default function Home() {
                 <Section title="Table View" size="half">
                     <Table>
                         {breaks.map((br) => (
-                            <BreakRow key={br.id} initial={br.initial} firstTen={br.firstTen} thirty={br.thirty} secondTen={br.secondTen}/>
+                            <BreakRow
+                                key={br.id}
+                                id={br.id}
+                                initial={br.initial}
+                                firstTen={br.firstTen}
+                                thirty={br.thirty}
+                                secondTen={br.secondTen}
+                                refreshBreaks={refreshBreaks}
+                            />
                         ))}
+                        <AddBreakRow refreshBreaks={refreshBreaks} />
                     </Table>
                 </Section>
             </div>

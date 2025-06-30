@@ -7,6 +7,13 @@ const app = express();
 app.use(cors()); // Allow frontend requests
 app.use(express.json());
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
 // GET: Fetch all breaks
 app.get('/api/breaks', (req, res) => {
   db.all('SELECT * FROM breaks', (err, rows) => {
@@ -17,10 +24,10 @@ app.get('/api/breaks', (req, res) => {
 
 // POST: Add a new break
 app.post('/api/breaks', (req, res) => {
-  const { initial, startTime, endTime } = req.body;
+  const { initial, firstTen, thirty, secondTen } = req.body;
   db.run(
-    'INSERT INTO breaks (initial, startTime, endTime) VALUES (?, ?, ?)',
-    [initial, startTime, endTime],
+    'INSERT INTO breaks (initial, firstTen, thirty, secondTen) VALUES (?, ?, ?, ?)',
+    [initial, firstTen, thirty, secondTen],
     (err) => {
       if (err) res.status(500).json({ error: err.message });
       else res.json({ success: true });
@@ -38,12 +45,30 @@ app.delete('/api/breaks/:id', (req, res) => {
 });
 
 //UPDATE: edit a break
-app.update('/api/breaks/:id', (req, res) => {
-    const {id} = req.params;
-    db.run('UPDATE breaks SET initial = ?, firstTen = ?, secondTen = ?, thirty = ? WHERE id = ?', [id], (err) => {
-        if(err) res.status(500).json({error: err.message});
-        else res.json({success: true});
-    });
+app.put('/api/breaks/:id', (req, res) => {
+    const { initial, firstTen, thirty, secondTen } = req.body;
+    const { id } = req.params;
+    
+    if (!id || isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid break ID' });
+    }
+    
+    db.run(
+        'UPDATE breaks SET initial = ?, firstTen = ?, thirty = ?, secondTen = ? WHERE id = ?', 
+        [initial, firstTen, thirty, secondTen, id], 
+        function(err) { 
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ error: 'Break not found' });
+            }
+            res.json({ 
+                success: true,
+                changes: this.changes
+            });
+        }
+    );
 });
 
 const PORT = 5000;

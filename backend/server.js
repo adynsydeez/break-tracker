@@ -37,6 +37,15 @@ app.delete('/api/breaks/:id', (req, res) => {
   });
 });
 
+//UPDATE: edit a break
+app.update('/api/breaks/:id', (req, res) => {
+    const {id} = req.params;
+    db.run('UPDATE breaks SET initial = ?, firstTen = ?, secondTen = ?, thirty = ? WHERE id = ?', [id], (err) => {
+        if(err) res.status(500).json({error: err.message});
+        else res.json({success: true});
+    });
+});
+
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Node.js backend running on http://localhost:${PORT}`);

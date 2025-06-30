@@ -25,7 +25,7 @@ const Table = ({ children }: TableProps) => {
                 </thead>
                 <tbody>
                     {children}
-                    <AddBreakTr />
+                    <AddBreakTr/>
                 </tbody>
             </table>
         </div>

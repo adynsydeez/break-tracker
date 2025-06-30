@@ -1,10 +1,11 @@
 import React from "react";
+import { useState } from "react";
 
 interface EditBreakButtonProps {
-    type: "remove" | "";
+    onClick: () => void;
 }
 
-const EditBreakButton = () => {
+const EditBreakButton = ( {onClick } : EditBreakButtonProps) => {
     const pencilSvg = (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +41,7 @@ const EditBreakButton = () => {
     );
     return (
         <label className="swap">
-            <input type="checkbox" />
+            <input type="checkbox" onClick={onClick}/>
             <div className="swap-off btn btn-soft btn-warning">{pencilSvg}</div>
             <div className="swap-on btn btn-soft btn-success">{tickSvg}</div>
         </label>

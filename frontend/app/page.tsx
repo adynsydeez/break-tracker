@@ -7,8 +7,16 @@ import BreakRow from "./components/table/BreakRow";
 
 import { useState, useEffect } from "react";
 
+type Break = {
+    id: string | number;
+    initial: any;
+    firstTen: any;
+    thirty: any;
+    secondTen: any;
+};
+
 export default function Home() {
-    const [breaks, setBreaks] = useState([]);
+    const [breaks, setBreaks] = useState<Break[]>([]);
 
     useEffect(() => {
         fetch("http://localhost:5000/api/breaks")
@@ -23,7 +31,7 @@ export default function Home() {
                 <Section title="Table View" size="half">
                     <Table>
                         {breaks.map((br) => (
-                            <BreakRow />
+                            <BreakRow key={br.id} initial={br.initial} firstTen={br.firstTen} thirty={br.thirty} secondTen={br.secondTen}/>
                         ))}
                     </Table>
                 </Section>

@@ -20,7 +20,7 @@ db.serialize(() => {
   `);
   db.run(`
     INSERT INTO breaks (initial, firstTen, thirty, secondTen)
-    VALUES ("AS", "11:20", "17:20", "19:20")
+    VALUES ("AS", "11:40", "18:00", "19:50")
   `);
 });
 

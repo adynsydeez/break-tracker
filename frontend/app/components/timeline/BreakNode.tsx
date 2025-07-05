@@ -3,7 +3,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
 interface BreakNodeProps {
-    id: number;
+    id: string;
     CXRep: string;
     duration?: number;
     isStart?: boolean;

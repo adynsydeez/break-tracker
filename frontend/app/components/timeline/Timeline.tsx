@@ -1,68 +1,129 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TimelineNode from "./TimelineNode";
 import BreakNode from "./BreakNode";
 import TimelineCol from "./TimelineCol";
 import { DndContext, closestCorners } from "@dnd-kit/core";
 import { resolveObjectURL } from "buffer";
 
-interface Break {
+type Break = {
     id: number;
-    startCol: number;
-    CXRep: string;
+    initial: any;
+    firstTen: any;
+    thirty: any;
+    secondTen: any;
+};
+
+type BreakSingular = {
+    initial: string;
+    startTime: string;
     duration: number;
+};
+
+interface TimelineProps {
+    breaks: Break[];
 }
 
-const Timeline = ({ breaks = [] }) => {
-    // Default example break data if none provided
-    const defaultBreaks: Break[] = [
-        { id: 1, startCol: 5, CXRep: "AS", duration: 10 },
-        { id: 2, startCol: 15, CXRep: "AS", duration: 30 },
-        { id: 3, startCol: 16, CXRep: "AS", duration: 30 }, // Overlapping with break 2
-        { id: 4, startCol: 17, CXRep: "AS", duration: 10 },
-    ];
+const Timeline = ({ breaks }: TimelineProps) => {
+    const [breaksState, setBreaksState] = useState<Break[]>(breaks);
 
-    const [breaksState, setBreaksState] = useState(
-        breaks.length > 0 ? breaks : defaultBreaks
-    );
+    useEffect(() => {
+        setBreaksState(breaks);
+    }, [breaks]);
 
-    // Function to find all breaks that START at a given column
-    const getBreaksStartingAtColumn = (colIndex: number): Break[] => {
-        return breaksState.filter(
-            (breakItem) => breakItem.startCol === colIndex
-        );
+    let breaksSingular: BreakSingular[] = [];
+    breaksState.forEach((b) => {
+        if (b.firstTen) {
+            breaksSingular.push({
+                initial: b.initial,
+                startTime: b.firstTen,
+                duration: 10,
+            });
+        }
+        if (b.thirty) {
+            breaksSingular.push({
+                initial: b.initial,
+                startTime: b.thirty,
+                duration: 30,
+            });
+        }
+        if (b.secondTen) {
+            breaksSingular.push({
+                initial: b.initial,
+                startTime: b.secondTen,
+                duration: 10,
+            });
+        }
+    });
+
+    function timeToMinutes(timeString: string) {
+        const parts = timeString.split(":");
+        let minutes = 0;
+
+        const hrsToMins =
+            parseInt(parts[0], 10) > 0
+                ? (parseInt(parts[0], 10) - 11) * 60
+                : 13 * 60;
+
+        minutes = hrsToMins + parseInt(parts[1], 10);
+        return minutes;
+    }
+
+    const timeToColIndex = (time: number) => Math.floor(time / 10);
+
+    const getBreaksStartingAtColumn = (colIndex: number): BreakSingular[] => {
+        const result = breaksSingular.filter((breakItem) => {
+            return (
+                timeToColIndex(timeToMinutes(breakItem.startTime)) === colIndex
+            );
+        });
+        return result;
     };
 
     // Function to check if a column is covered by any break (for stacking position)
     const getStackLevelForBreak = (
-        breakItem: Break,
+        breakItem: BreakSingular,
         colIndex: number
     ): number => {
+        const start = breakItem.startTime;
+        const duration = breakItem.duration;
+        const startCol = timeToColIndex(timeToMinutes(breakItem.startTime));
+        const endCol = startCol + duration / 10 - 1;
+
         // Find all breaks that cover this column
-        const coveringBreaks = breaksState.filter((b) => {
-            const bEndCol = b.startCol + b.duration / 10 - 1;
-            return colIndex >= b.startCol && colIndex <= bEndCol;
+        const coveringBreaks = breaksSingular.filter((b) => {
+            const { startTime: bStart, duration: bDuration } = b;
+            const bStartCol = timeToColIndex(timeToMinutes(bStart));
+            const bEndCol = bStartCol + bDuration / 10 - 1;
+            return colIndex >= bStartCol && colIndex <= bEndCol;
         });
 
-        // Sort by their order in breaksState (first come, first served)
-        // (breaksState is already in order of addition)
-        // So, just use their index in breaksState
-        return coveringBreaks.findIndex((b) => b.id === breakItem.id);
+        return coveringBreaks.findIndex(
+            (b) =>
+                b.initial + b.startTime ===
+                breakItem.initial + breakItem.startTime
+        );
     };
 
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (!over) return;
 
-        // Extract break id and column index
         const breakId = parseInt(active.id.replace("break-", ""));
         const colIndex = parseInt(over.id.replace("col-", ""));
+        const newStartTime = colIndex * 10;
 
         setBreaksState((prev) =>
-            prev.map((b) =>
-                b.id === breakId ? { ...b, startCol: colIndex } : b
-            )
+            prev.map((b) => {
+                if (b.id !== breakId) return b;
+                // Update the correct time property
+                if (b.firstTen) return { ...b, firstTen: String(newStartTime) };
+                if (b.thirty) return { ...b, thirty: String(newStartTime) };
+                if (b.secondTen)
+                    return { ...b, secondTen: String(newStartTime) };
+                return b;
+            })
         );
     };
 
@@ -90,7 +151,10 @@ const Timeline = ({ breaks = [] }) => {
 
                                         return (
                                             <div
-                                                key={`break-${breakItem.id}`}
+                                                key={`break-${
+                                                    breakItem.initial +
+                                                    breakItem.startTime
+                                                }`}
                                                 className="absolute"
                                                 style={{
                                                     top: `${
@@ -101,8 +165,11 @@ const Timeline = ({ breaks = [] }) => {
                                                 }}
                                             >
                                                 <BreakNode
-                                                    id={breakItem.id}
-                                                    CXRep={breakItem.CXRep}
+                                                    id={
+                                                        breakItem.initial +
+                                                        breakItem.startTime
+                                                    }
+                                                    CXRep={breakItem.initial}
                                                     duration={
                                                         breakItem.duration
                                                     }

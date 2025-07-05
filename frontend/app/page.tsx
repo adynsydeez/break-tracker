@@ -7,6 +7,7 @@ import BreakRow from "./components/table/BreakRow";
 import AddBreakRow from "./components/table/AddBreakRow";
 
 import { useState, useEffect } from "react";
+import ErrorModal from "./components/ErrorModal";
 
 type Break = {
     id: number;
@@ -18,11 +19,23 @@ type Break = {
 
 export default function Home() {
     const [breaks, setBreaks] = useState<Break[]>([]);
+    const [showMissingFieldsError, setShowMissingFieldsError] = useState(false);
+    const [showInvalidTimeError, setShowInvalidTimeError] = useState(false);
 
     const refreshBreaks = () => {
         fetch("http://localhost:5000/api/breaks")
             .then((res) => res.json())
             .then((data) => setBreaks(data));
+    };
+
+    const handleShowError = (error: string) => {
+        if (error == "missingFields") setShowMissingFieldsError(true);
+        else if (error == "invalidTime") setShowInvalidTimeError(true);
+    };
+
+    const handleHideError = () => {
+        setShowMissingFieldsError(false);
+        setShowInvalidTimeError(false);
     };
 
     useEffect(() => {
@@ -35,18 +48,28 @@ export default function Home() {
                 {/* Bottom section - Table View */}
                 <Section title="Table View" size="half">
                     <Table>
-                        {breaks.map((br) => (
+                        {breaks.map((br: Break) => (
                             <BreakRow
                                 key={br.id}
-                                id={br.id}
-                                initial={br.initial}
-                                firstTen={br.firstTen}
-                                thirty={br.thirty}
-                                secondTen={br.secondTen}
+                                breakItem={br}
+                                showMissingFieldsError={() =>
+                                    handleShowError("missingFields")
+                                }
+                                showInvalidTimeError={() =>
+                                    handleShowError("invalidTime")
+                                }
                                 refreshBreaks={refreshBreaks}
                             />
                         ))}
-                        <AddBreakRow refreshBreaks={refreshBreaks} />
+                        <AddBreakRow
+                            refreshBreaks={refreshBreaks}
+                            showMissingFieldsError={() =>
+                                handleShowError("missingFields")
+                            }
+                            showInvalidTimeError={() =>
+                                handleShowError("invalidTime")
+                            }
+                        />
                     </Table>
                 </Section>
             </div>
@@ -54,9 +77,22 @@ export default function Home() {
             {/* Right column - takes 2/3 of width */}
             <div className="row-span-2 col-span-15 ...">
                 <Section title="Timeline View" size="half">
-                    <Timeline />
+                    <Timeline breaks={breaks} />
                 </Section>
             </div>
+
+            {showMissingFieldsError && (
+                <ErrorModal
+                    message="All fields are required."
+                    onExit={handleHideError}
+                />
+            )}
+            {showInvalidTimeError && (
+                <ErrorModal
+                    message="One or more times are outside the valid range."
+                    onExit={handleHideError}
+                />
+            )}
         </div>
     );
 }

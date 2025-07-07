@@ -7,7 +7,7 @@ This is a Next.js application created for the purpose of tracking and organising
 1. Install [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/en/download)
 2. Clone this repository into your desired file location:
 
-    ```bash
+    ```bash title="Terminal"
     git clone https://github.com/adynsydeez/break-tracker
     ```
 

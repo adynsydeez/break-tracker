@@ -71,6 +71,86 @@ app.put('/api/breaks/:id', (req, res) => {
     );
 });
 
+// DELETE: Remove all breaks and reset IDs
+app.delete('/api/breaks', (req, res) => {
+  db.serialize(() => {
+    db.run('DROP TABLE IF EXISTS breaks', (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      db.run(
+        `CREATE TABLE breaks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          initial TEXT,
+          firstTen TEXT,
+          thirty TEXT,
+          secondTen TEXT
+        )`,
+        (err) => {
+          if (err) res.status(500).json({ error: err.message });
+          else res.json({ success: true });
+        }
+      );
+    });
+  });
+});
+
+function scheduleDailyReset() {
+  const now = new Date();
+  const next8am = new Date();
+  next8am.setHours(8, 0, 0, 0);
+  if (now >= next8am) {
+    next8am.setDate(next8am.getDate() + 1);
+  }
+  const msUntil8am = next8am.getTime() - now.getTime();
+
+  setTimeout(() => {
+    // Clear breaks at 8am
+    db.serialize(() => {
+      db.run('DROP TABLE IF EXISTS breaks', (err) => {
+        if (err) console.error('Error dropping breaks table:', err);
+        db.run(
+          `CREATE TABLE breaks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            initial TEXT,
+            firstTen TEXT,
+            thirty TEXT,
+            secondTen TEXT
+          )`,
+          (err) => {
+            if (err) console.error('Error creating breaks table:', err);
+            else console.log('Breaks reset at 8am');
+          }
+        );
+      });
+    });
+    // Schedule next reset in 24 hours
+    setInterval(() => {
+      db.serialize(() => {
+        db.run('DROP TABLE IF EXISTS breaks', (err) => {
+          if (err) console.error('Error dropping breaks table:', err);
+          db.run(
+            `CREATE TABLE breaks (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              initial TEXT,
+              firstTen TEXT,
+              thirty TEXT,
+              secondTen TEXT
+            )`,
+            (err) => {
+              if (err) console.error('Error creating breaks table:', err);
+              else console.log('Breaks reset at 8am');
+            }
+          );
+        });
+      });
+    }, 24 * 60 * 60 * 1000);
+  }, msUntil8am);
+
+    console.log('Now (local):', now.toLocaleString());
+    console.log('Next 8am (local):', next8am.toLocaleString());
+}
+
+scheduleDailyReset();
+
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Node.js backend running on http://localhost:${PORT}`);

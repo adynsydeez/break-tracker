@@ -18,10 +18,6 @@ db.serialize(() => {
       secondTen TEXT NOT NULL
     )
   `);
-  db.run(`
-    INSERT INTO breaks (initial, firstTen, thirty, secondTen)
-    VALUES ("AS", "11:40", "18:00", "19:50")
-  `);
 });
 
 module.exports = db;

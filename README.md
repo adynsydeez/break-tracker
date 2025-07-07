@@ -5,7 +5,10 @@ This is a Next.js application created for the purpose of tracking and organising
 ## Instructions for Testing Locally
 1. Install git https://git-scm.com/downloads and node.js https://nodejs.org/en/download
 2. Clone this repository into your desired file location ```powershell
-   git clone https://github.com/adynsydeez/break-tracker```
+{
+   git clone https://github.com/adynsydeez/break-tracker
+}
+```
 5. Enter the folder `cd break-tracker`
 6. Install dependencies `npm install`
 7. run the frontend and backend servers. This will require two command lines.

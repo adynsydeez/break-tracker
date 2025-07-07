@@ -45,10 +45,10 @@ const BreakRow = ({
 
     const editBreak = async () => {
         if (
-            (editInitial == "" ||
-                editFirstTen == "" ||
-                editThirty == "" ||
-                editSecondTen == "") &&
+            editInitial == "" && //||
+            // editFirstTen == "" ||
+            // editThirty == "" ||
+            // editSecondTen == ""
             !(
                 (!editInitial || editInitial === "") &&
                 (!editFirstTen || editFirstTen === "") &&

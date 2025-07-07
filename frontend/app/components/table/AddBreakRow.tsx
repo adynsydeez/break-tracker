@@ -21,10 +21,10 @@ const AddBreakRow = ({
 
     const addBreak = async () => {
         if (
-            initial == "" ||
-            firstTen == "" ||
-            thirty == "" ||
-            secondTen == ""
+            initial == "" //||
+            // firstTen == "" ||
+            // thirty == "" ||
+            // secondTen == ""
         ) {
             showMissingFieldsError();
             return;

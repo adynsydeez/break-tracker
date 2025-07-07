@@ -83,7 +83,7 @@ export default function Home() {
 
             {showMissingFieldsError && (
                 <ErrorModal
-                    message="All fields are required."
+                    message="Initial is required."
                     onExit={handleHideError}
                 />
             )}

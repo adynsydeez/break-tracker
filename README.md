@@ -19,11 +19,24 @@ This is a Next.js application created for the purpose of tracking and organising
 
 4. Install dependencies:
 
+   **Frontend:**
     ```bash
+    cd frontend
     npm install
     ```
 
-5. Run the frontend and backend servers (you’ll need two terminal windows or tabs):
+    **Backend:**
+    ```bash
+    cd backend
+    npm install
+    ```
+
+    To return to break-tracker directory
+   ```bash
+   cd ..
+   ```
+
+6. Run the frontend and backend servers (you’ll need two terminal windows or tabs):
 
     **Frontend:**
     ```bash
@@ -37,7 +50,7 @@ This is a Next.js application created for the purpose of tracking and organising
     node server.js
     ```
 
-6. Open your browser and go to:
+7. Open your browser and go to:
 
     ```
     http://localhost:3000

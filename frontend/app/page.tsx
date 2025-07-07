@@ -77,7 +77,7 @@ export default function Home() {
             {/* Right column - takes 2/3 of width */}
             <div className="row-span-2 col-span-15 ...">
                 <Section title="Timeline View" size="half">
-                    <Timeline breaks={breaks} />
+                    <Timeline breaks={breaks} refreshBreaks={refreshBreaks} />
                 </Section>
             </div>
 

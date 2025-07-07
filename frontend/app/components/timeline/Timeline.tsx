@@ -16,6 +16,7 @@ type Break = {
 };
 
 type BreakSingular = {
+    id: string;
     initial: string;
     startTime: string;
     duration: number;
@@ -23,9 +24,10 @@ type BreakSingular = {
 
 interface TimelineProps {
     breaks: Break[];
+    refreshBreaks: () => void;
 }
 
-const Timeline = ({ breaks }: TimelineProps) => {
+const Timeline = ({ breaks, refreshBreaks }: TimelineProps) => {
     const [breaksState, setBreaksState] = useState<Break[]>(breaks);
 
     useEffect(() => {
@@ -33,9 +35,11 @@ const Timeline = ({ breaks }: TimelineProps) => {
     }, [breaks]);
 
     let breaksSingular: BreakSingular[] = [];
+    let breakCounter = 0;
     breaksState.forEach((b) => {
         if (b.firstTen) {
             breaksSingular.push({
+                id: `break-${b.id}-firstTen`,
                 initial: b.initial,
                 startTime: b.firstTen,
                 duration: 10,
@@ -43,6 +47,7 @@ const Timeline = ({ breaks }: TimelineProps) => {
         }
         if (b.thirty) {
             breaksSingular.push({
+                id: `break-${b.id}-thirty`,
                 initial: b.initial,
                 startTime: b.thirty,
                 duration: 30,
@@ -50,6 +55,7 @@ const Timeline = ({ breaks }: TimelineProps) => {
         }
         if (b.secondTen) {
             breaksSingular.push({
+                id: `break-${b.id}-secondTen`,
                 initial: b.initial,
                 startTime: b.secondTen,
                 duration: 10,
@@ -106,18 +112,49 @@ const Timeline = ({ breaks }: TimelineProps) => {
         );
     };
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = async (event: any) => {
         const { active, over } = event;
         if (!over) return;
 
-        const breakId = parseInt(active.id.replace("break-", ""));
+        const match = active.id.match(
+            /^break-(\d+)-(firstTen|thirty|secondTen)$/
+        );
+        if (!match) return;
+        const breakId = parseInt(match[1], 10);
+        const breakType = match[2];
+
         const colIndex = parseInt(over.id.replace("col-", ""));
         const newStartTime = colIndex * 10;
+        const breakToUpdate = breaksState.find((b) => b.id === breakId);
+        if (!breakToUpdate) return;
+
+        let updatedFields: any = {};
+        if (breakType === "firstTen")
+            updatedFields.firstTen = `${Math.floor(newStartTime / 60) + 11}:${(
+                newStartTime % 60
+            )
+                .toString()
+                .padStart(2, "0")}`;
+        if (breakType === "thirty")
+            updatedFields.thirty = `${
+                Math.floor((newStartTime + 10) / 60) + 11
+            }:${(newStartTime % 60).toString().padStart(2, "0")}`;
+        if (breakType === "secondTen")
+            updatedFields.secondTen = `${Math.floor(newStartTime / 60) + 11}:${(
+                newStartTime % 60
+            )
+                .toString()
+                .padStart(2, "0")}`;
+
+        await fetch(`http://localhost:5000/api/breaks/${breakId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...breakToUpdate, ...updatedFields }),
+        });
 
         setBreaksState((prev) =>
             prev.map((b) => {
                 if (b.id !== breakId) return b;
-                // Update the correct time property
                 if (b.firstTen) return { ...b, firstTen: String(newStartTime) };
                 if (b.thirty) return { ...b, thirty: String(newStartTime) };
                 if (b.secondTen)
@@ -125,6 +162,8 @@ const Timeline = ({ breaks }: TimelineProps) => {
                 return b;
             })
         );
+
+        refreshBreaks();
     };
 
     return (
@@ -142,7 +181,7 @@ const Timeline = ({ breaks }: TimelineProps) => {
                             <TimelineCol index={index} key={index}>
                                 {/* Break nodes that START at this column */}
                                 {breaksStartingHere.map(
-                                    (breakItem, breakIndex) => {
+                                    (breakItem) => {
                                         const stackLevel =
                                             getStackLevelForBreak(
                                                 breakItem,
@@ -165,10 +204,7 @@ const Timeline = ({ breaks }: TimelineProps) => {
                                                 }}
                                             >
                                                 <BreakNode
-                                                    id={
-                                                        breakItem.initial +
-                                                        breakItem.startTime
-                                                    }
+                                                    id={breakItem.id}
                                                     CXRep={breakItem.initial}
                                                     duration={
                                                         breakItem.duration

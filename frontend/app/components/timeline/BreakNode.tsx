@@ -1,6 +1,7 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { randomInt } from "crypto";
 
 interface BreakNodeProps {
     id: string;
@@ -17,17 +18,19 @@ const BreakNode = ({
     isStart = false,
     stackLevel = 0,
 }: BreakNodeProps) => {
-    // Different colors for different stack levels to help distinguish overlapping breaks
-    const colorVariants: string[] = [
+    const colourVariants: string[] = [
         "bg-info border-info text-error-info",
         "bg-warning border-warning text-error-warning",
         "bg-error border-error text-error-error",
+        "bg-success border-success text-error-success",
+        "bg-secondary border-secondary text-error-secondary",
     ];
 
-    const colorClass = colorVariants[stackLevel % colorVariants.length];
+    const idNum: number = parseInt(id.split("-")[1]);
+    const colourClass = colourVariants[(idNum - 1) % colourVariants.length];
 
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id: `break-${id}`
+        id,
     });
     const style = {
         transform: CSS.Translate.toString(transform),
@@ -39,14 +42,12 @@ const BreakNode = ({
         zIndex: 1000,
     };
 
-    // For continuation columns, return null since we're rendering one spanning element
     if (!isStart) return null;
 
-    // If this is the start of a break, render the full spanning node
     return (
         <button ref={setNodeRef} style={style} {...listeners} {...attributes}>
             <div
-                className={`h-[100px] mt-[5vh] ${colorClass} border-2 rounded flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm text-xs font-medium`}
+                className={`h-[100px] mt-[5vh] ${colourClass} border-2 rounded flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm text-xs font-medium`}
             >
                 <span className="text-wrap px-1">{`${CXRep} - ${duration}`}</span>
             </div>
